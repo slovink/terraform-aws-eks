@@ -1,101 +1,146 @@
-# Terraform-aws-eks
+<<p align="center"> <img src="https://user-images.githubusercontent.com/50652676/62349836-882fef80-b51e-11e9-99e3-7b974309c7e3.png" width="100" height="100"></p>
 
-# Terraform AWS Cloud EKS Module
 
-## Table of Contents
+<h1 align="center">
+    Terraform AWS  Eks
+</h1>
+
+
+<p align="center">
+
+<a href="https://www.terraform.io">
+  <img src="https://img.shields.io/badge/Terraform-v1.7.0-green" alt="Terraform">
+</a>
+<a href="https://github.com/slovink/terraform-aws-eks/blob/master/LICENSE">
+  <img src="https://img.shields.io/badge/License-APACHE-blue.svg" alt="Licence">
+</a>
+
+
+
+</p>
+<p align="center">
+
+<a href='https://www.facebook.com/Slovink.in=https://github.com/slovink/terraform-aws-eks '>
+  <img title="Share on Facebook" src="https://user-images.githubusercontent.com/50652676/62817743-4f64cb80-bb59-11e9-90c7-b057252ded50.png" />
+</a>
+<a href='https://www.linkedin.com/company/101534993/admin/feed/posts/=https://github.com/slovink/terraform-aws-eks '>
+  <img title="Share on LinkedIn" src="https://user-images.githubusercontent.com/50652676/62817742-4e339e80-bb59-11e9-87b9-a1f68cae1049.png" />
+</a>
+
+
+
 - [Introduction](#introduction)
 - [Usage](#usage)
-- [Example](#Example)
-- [Author](#Author)
+- [Module Inputs](#module-inputs)
+- [Module Outputs](#module-outputs)
+- [Examples](#examples)
 - [License](#license)
-- [Inputs](#inputs)
-- [Outputs](#outputs)
+
+
+
+## Prerequisites
+
+This module has a few dependencies:
+
+- [Terraform 1.x.x](https://learn.hashicorp.com/terraform/getting-started/install.html)
+- [Go](https://golang.org/doc/install)
+
+
 
 ## Introduction
-This Terraform module creates an AWS Elastic Kubernetes Service (EKS) along with additional configuration options.
-## Usage
-To use this module, you can include it in your Terraform configuration. Here's an example of how to use it:
+This Terraform module creates an AWS security-group along with additional configuration options.
 
-## Example
-
-```hcl
-module "eks" {
-  source      = " "../""
-  enabled     = true
-  name        = local.name
-  environment = local.environment
-
-  # EKS
-  kubernetes_version     = "1.27"
-  endpoint_public_access = true
-  # Networking
-  vpc_id                            = module.vpc.id
-  subnet_ids                        = module.subnets.private_subnet_id
-  allowed_security_groups           = [module.ssh.security_group_id]
-  eks_additional_security_group_ids = ["${module.ssh.security_group_id}", "${module.http_https.security_group_id}"]
-  allowed_cidr_blocks               = [local.vpc_cidr_block]
-
-  managed_node_group_defaults = {
-    subnet_ids                          = module.subnets.private_subnet_id
-    nodes_additional_security_group_ids = [module.ssh.security_group_id]
-    tags = {
-      "kubernetes.io/cluster/${module.eks.cluster_name}" = "shared"
-      "k8s.io/cluster/${module.eks.cluster_name}"        = "shared"
-    }
-    block_device_mappings = {
-      xvda = {
-        device_name = "/dev/xvda"
-        ebs = {
-          volume_size = 50
-          volume_type = "gp3"
-          iops        = 3000
-          throughput  = 150
-          encrypted   = true
-          kms_key_id  = module.kms.key_arn
-        }
-      }
-    }
-  }
-  managed_node_group = {
-    critical = {
-      name           = "${module.eks.cluster_name}-critical-node"
-      capacity_type  = "ON_DEMAND"
-      min_size       = 1
-      max_size       = 2
-      desired_size   = 2
-      instance_types = ["t3.medium"]
-    }
-
-    application = {
-      name                 = "${module.eks.cluster_name}-application"
-      capacity_type        = "SPOT"
-      min_size             = 1
-      max_size             = 2
-      desired_size         = 1
-      force_update_version = true
-      instance_types       = ["t3.medium"]
-    }
-  }
-
-  apply_config_map_aws_auth = true
-  map_additional_iam_users = [
-    {
-      userarn  = "arn:aws:iam::123456789:user/slovink"
-      username = "test"
-      groups   = ["system:masters"]
-    }
-  ]
-}
-```
-
-## Example
-For detailed examples on how to use this module, please refer to the [Examples](https://github.com/slovink/terraform-aws-eks/blob/master/example) directory within this repository.
+## Examples
+For detailed examples on how to use this module, please refer to the [Examples](https://github.com/slovink/terraform-aws-eks/tree/master/example) directory within this repository.
 
 ## Author
 Your Name Replace **MIT** and **slovink** with the appropriate license and your information. Feel free to expand this README with additional details or usage instructions as needed for your specific use case.
 
 ## License
 This project is licensed under the **MIT** License - see the [LICENSE](https://github.com/slovink/terraform-aws-eks/blob/master/LICENSE) file for details.
+
+## Feedback
+If you come accross a bug or have any feedback, please log it in our [issue tracker](https://github.com/slovink/terraform-aws-eks/issues), or feel free to drop us an email at [concat@slovink.com](concat@slovink.com).
+
+If you have found it worth your time, go ahead and give us a ★ on [our GitHub](https://github.com/slovink/terraform-aws-eks)!
+
+
+## About us
+At https://slovink.com/ we offer expert guidance, implementation support and services to help organisations accelerate their journey to the slovi. Our
+services include docker and container orchestration, slov migration and adoption, infrastructure automation, application modernisation and
+remediation, and performance engineering.
+
+
+## Example
+   ```hcl
+      module "eks" {
+        source      = "https://github.com/slovink/terraform-aws-eks.git?ref=v1.0.0"
+        enabled     = true
+        name        = local.name
+        environment = local.environment
+
+        # EKS
+        kubernetes_version     = "1.28"
+        endpoint_public_access = true
+        # Networking
+        vpc_id                            = module.vpc.id
+        subnet_ids                        = module.subnets.private_subnet_id
+        allowed_security_groups           = [module.ssh.security_group_id]
+        eks_additional_security_group_ids = [module.ssh.security_group_id, module.http_https.security_group_id]
+        allowed_cidr_blocks               = [local.vpc_cidr_block]
+
+        managed_node_group_defaults = {
+          subnet_ids                          = module.subnets.private_subnet_id
+          nodes_additional_security_group_ids = [module.ssh.security_group_id]
+          tags = {
+            "kubernetes.io/cluster/${module.eks.cluster_name}" = "shared"
+            "k8s.io/cluster/${module.eks.cluster_name}"        = "shared"
+          }
+          block_device_mappings = {
+            xvda = {
+              device_name = "/dev/xvda"
+              ebs = {
+                volume_size = 50
+                volume_type = "gp3"
+                iops        = 3000
+                throughput  = 150
+                encrypted   = true
+                kms_key_id  = module.kms.key_arn
+              }
+            }
+          }
+        }
+        managed_node_group = {
+          critical = {
+            name           = "${module.eks.cluster_name}-critical-node"
+            capacity_type  = "ON_DEMAND"
+            min_size       = 1
+            max_size       = 2
+            desired_size   = 2
+            instance_types = ["t3.medium"]
+          }
+
+          application = {
+            name                 = "${module.eks.cluster_name}-application"
+            capacity_type        = "SPOT"
+            min_size             = 1
+            max_size             = 2
+            desired_size         = 1
+            force_update_version = true
+            instance_types       = ["t3.medium"]
+          }
+        }
+
+        apply_config_map_aws_auth = true
+        map_additional_iam_users = [
+          {
+            userarn  = "arn:aws:iam::123456789:user/cypik"
+            username = "test"
+            groups   = ["system:masters"]
+          }
+        ]
+      }
+   ```
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

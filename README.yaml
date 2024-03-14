@@ -1,0 +1,112 @@
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name : Terraform Eks
+
+# License of this project
+license: "APACHE"
+
+# Canonical GitHub repo
+github_repo: git@github.com:slovink/terraform-aws-eks.git
+
+
+# Badges to display
+badges:
+  - name: "Terraform"
+    image: "https://img.shields.io/badge/Terraform-v1.7.0-green"
+    url: "https://www.terraform.io"
+  - name: "Licence"
+    image: "https://img.shields.io/badge/License-APACHE-blue.svg"
+    url: "https://github.com/slovink/terraform-aws-eks/blob/master/LICENSE"
+  - name: "tfsec"
+    image: "https://github.com/slovink/terraform-aws-eks/blob/master/.github/workflows/tfsec.yml"
+    url: "https://github.com/slovink/terraform-aws-eks/blob/master/.github/workflows/tfsec.yml"
+
+
+
+#  description of this project
+description: |-
+  This terraform module is designed to generate consistent label names and tags for resources. You can use terraform-vpc to implement a strict naming convention.
+
+
+include:
+  - "terraform.md"
+# How to use this project
+usage : |-
+
+  ### Simple Example:- basic
+  Here is an example of how you can use this module in your inventory structure:
+  ```hcl
+
+     module "eks" {
+        source      = "https://github.com/slovink/terraform-aws-eks.git?ref=v1.0.0"
+        enabled     = true
+        name        = local.name
+        environment = local.environment
+
+        # EKS
+        kubernetes_version     = "1.28"
+        endpoint_public_access = true
+        # Networking
+        vpc_id                            = module.vpc.id
+        subnet_ids                        = module.subnets.private_subnet_id
+        allowed_security_groups           = [module.ssh.security_group_id]
+        eks_additional_security_group_ids = [module.ssh.security_group_id, module.http_https.security_group_id]
+        allowed_cidr_blocks               = [local.vpc_cidr_block]
+
+        managed_node_group_defaults = {
+          subnet_ids                          = module.subnets.private_subnet_id
+          nodes_additional_security_group_ids = [module.ssh.security_group_id]
+          tags = {
+            "kubernetes.io/cluster/${module.eks.cluster_name}" = "shared"
+            "k8s.io/cluster/${module.eks.cluster_name}"        = "shared"
+          }
+          block_device_mappings = {
+            xvda = {
+              device_name = "/dev/xvda"
+              ebs = {
+                volume_size = 50
+                volume_type = "gp3"
+                iops        = 3000
+                throughput  = 150
+                encrypted   = true
+                kms_key_id  = module.kms.key_arn
+              }
+            }
+          }
+        }
+        managed_node_group = {
+          critical = {
+            name           = "${module.eks.cluster_name}-critical-node"
+            capacity_type  = "ON_DEMAND"
+            min_size       = 1
+            max_size       = 2
+            desired_size   = 2
+            instance_types = ["t3.medium"]
+          }
+
+          application = {
+            name                 = "${module.eks.cluster_name}-application"
+            capacity_type        = "SPOT"
+            min_size             = 1
+            max_size             = 2
+            desired_size         = 1
+            force_update_version = true
+            instance_types       = ["t3.medium"]
+          }
+        }
+
+        apply_config_map_aws_auth = true
+        map_additional_iam_users = [
+          {
+            userarn  = "arn:aws:iam::123456789:user/cypik"
+            username = "test"
+            groups   = ["system:masters"]
+          }
+        ]
+     }
+  ```
+
