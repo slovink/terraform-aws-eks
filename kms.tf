@@ -1,4 +1,3 @@
-
 data "aws_iam_policy_document" "cloudwatch" {
   policy_id = "key-policy-cloudwatch"
   statement {
