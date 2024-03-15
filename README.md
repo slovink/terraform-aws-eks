@@ -48,7 +48,7 @@ This module has a few dependencies:
 
 
 ## Introduction
-This Terraform module creates an AWS security-group along with additional configuration options.
+This Terraform module creates an AWS EKS along with additional configuration options.
 
 ## Examples
 For detailed examples on how to use this module, please refer to the [Examples](https://github.com/slovink/terraform-aws-eks/tree/master/example) directory within this repository.
